@@ -18,14 +18,32 @@ sub default-formatter($self) {
     .month ?? sprintf('%04d-%02d-%02d', .year, .month, .day) !! sprintf('%04d-%02d', .year, .day) given $self;
 }
 
-multi method new(Int:D $year, Int $month, Int:D $day, :&formatter = &default-formatter) {
-    self.new(.year, .month, .day, :&formatter) given ifc-to-date($year, $month, $day);
+multi method new(Int:D(Any:D) $year, Int(Any) $month, Int:D(Any:D) $day, :&formatter = &default-formatter) {
+    self.Date::new(.year, .month, .day, :&formatter) given ifc-to-date($year, $month, $day);
 }
 
-#multi method new(Int:D :$year!, Int :$month, Int:D :$day = 1) {
-#    return 42;
-#    callwith($year, $month, $day);
-#}
+multi method new(Int:D(Any:D) $year, Int:D(Any:D) $month, Int:D(Any:D) $day, :&formatter = &default-formatter) {
+    self.Date::new(.year, .month, .day, :&formatter) given ifc-to-date($year, $month, $day);
+}
+
+multi method new(Int:D :$year!, Int :$month, Int:D :$day = 1) {
+    self.Date::new($year, $month, $day);
+}
+
+multi method new(Str:D $date, :&formatter = &default-formatter) {
+    my @parts = $date.split("-");
+
+    return samewith(@parts[0], Int, @parts[1], :&formatter) if @parts.elems == 2;
+    return samewith(@parts[0], @parts[1], @parts[2], :&formatter);
+}
+
+multi method new(Dateish $d, :&formatter = &default-formatter) {
+    nextwith($d, :&formatter);
+}
+
+multi method new(Instant $i, :&formatter = &default-formatter) {
+    nextwith($i, :&formatter);
+}
 
 method Date {
     return Date.new(.Date::year, .Date::month, .Date::day) given self;
@@ -33,7 +51,7 @@ method Date {
 
 method day {
     my $day-of-year = self.day-of-year;
- 
+
     # exception for New Year Day (month is not defined)
     return 1 if $day-of-year == 366 || $day-of-year == 365 && !self.is-leap-year;
 
@@ -96,3 +114,5 @@ Copyright 2019 cono
 This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
 
 =end pod
+
+# vim: ft=perl6

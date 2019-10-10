@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cono/p6-international-fixed-calendar.svg?branch=master)](https://travis-ci.org/cono/p6-international-fixed-calendar)
+
 NAME
 ====
 
